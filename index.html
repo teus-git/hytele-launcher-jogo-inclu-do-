@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>Hytele Launcher</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="launcher-root">
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="window-bar">
+        <div class="window-title"><span style="color:var(--accent-blue)">■</span> Hytele Launcher</div>
+        <div class="window-controls">
+            <button class="win-btn">_</button>
+            <button class="win-btn">□</button>
+            <button class="win-btn close" onclick="window.close()">X</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="nav-item active" onclick="Launcher.nav('view-play')">
+                <span>⚔️</span> Hytele Beta Edition
+            </div>
+            <div class="nav-item" onclick="Launcher.nav('view-installations')">
+                <span>📂</span> Instalações
+            </div>
+            <div class="nav-item" onclick="Launcher.nav('view-skins')">
+                <span>👕</span> Skins
+            </div>
+            <div class="nav-item" onclick="Launcher.nav('view-settings')">
+                <span>⚙️</span> Configurações
+            </div>
+            <div style="margin-top:auto; padding:20px; border-top:1px solid #444; color:#ccc; display:flex; align-items:center; gap:10px">
+                <div style="width:24px;height:24px;background:#555;border-radius:50%"></div>
+                <span id="user-display">Adventurer</span>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="content-tabs">
+                <button class="tab-btn active" onclick="Launcher.switchTab(this, 'view-play')">Jogar</button>
+                <button class="tab-btn" onclick="Launcher.switchTab(this, 'view-installations')">Instalações</button>
+                <button class="tab-btn" onclick="Launcher.switchTab(this, 'view-patch')">Notas de Atualização</button>
+            </div>
+
+            <div id="view-play" class="view-panel active-view">
+                <div class="news-grid" id="news-feed"></div>
+
+                <div class="bottom-action-bar">
+                    <div class="play-wrapper">
+                        <div class="version-selector" onclick="Launcher.nav('view-installations')">
+                            <div style="font-size:10px;color:#ddd">Instalação atual</div>
+                            <div style="font-weight:bold" id="display-version">Carregando...</div>
+                        </div>
+                        <button class="play-btn" id="btn-play" onclick="Launcher.play()">JOGAR</button>
+                    </div>
+                    
+                    <div class="progress-container" id="progress-area">
+                        <div style="display:flex;justify-content:space-between;width:100%;color:#ccc;font-size:12px">
+                            <span id="status-msg">Preparando...</span>
+                            <span id="status-percent">0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" id="progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-installations" class="view-panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h2>Minhas Instalações</h2>
+                    <button class="btn-primary" onclick="Launcher.openModal('modal-install')">+ Nova Instalação</button>
+                </div>
+                <div id="install-list"></div>
+            </div>
+
+            <div id="view-skins" class="view-panel">
+                <h2>Biblioteca de Skins</h2>
+                <div style="padding:40px; text-align:center; color:#666; border:2px dashed #444; margin-top:20px; border-radius:8px;">
+                    Arraste um arquivo .png aqui (Simulação)
+                </div>
+            </div>
+
+             <div id="view-patch" class="view-panel">
+                <h2>Notas de Atualização - Hytele Physics Fix</h2>
+                <ul style="margin-left:20px; margin-top:10px; line-height:1.6; color:#ccc">
+                    <li><strong>FIX:</strong> Terreno agora é sólido (sem buracos/void).</li>
+                    <li><strong>FIX:</strong> Colisão melhorada: impossível atravessar blocos.</li>
+                    <li><strong>FIX:</strong> Câmera com movimento livre ajustado.</li>
+                    <li><strong>NEW:</strong> Árvores completas geradas no mundo.</li>
+                </ul>
+            </div>
+
+            <div id="view-settings" class="view-panel">
+                <h2>Configurações</h2>
+                <br>
+                <div class="install-item">
+                    <span>Manter launcher aberto ao iniciar</span>
+                    <input type="checkbox" checked style="margin-left:auto; width:20px; height:20px;">
+                </div>
+                <div class="install-item">
+                    <span>Resolução do Jogo</span>
+                    <select style="margin-left:auto; width:150px">
+                        <option>Automático</option>
+                        <option>1920x1080</option>
+                        <option>1280x720</option>
+                    </select>
+                </div>
+                <button class="btn-small" style="background:#d32f2f; margin-top:20px" onclick="Store.reset()">Resetar Tudo</button>
+            </div>
+        </main>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modal-install">
+    <div class="modal-box">
+        <h3 style="color:white; margin-bottom:20px">Nova Instalação</h3>
+        <div class="input-group">
+            <label>Nome</label>
+            <input type="text" id="inst-name" placeholder="Ex: Hytele Survival">
+        </div>
+        <div class="input-group">
+            <label>Versão</label>
+            <select id="inst-ver">
+                <option value="Hytele Beta 1.0">Hytele Beta 1.0</option>
+                <option value="Alpha Test">Alpha Test</option>
+            </select>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px">
+            <button class="btn-small" onclick="Launcher.closeModal('modal-install')">Cancelar</button>
+            <button class="btn-primary" onclick="InstallManager.create()">Criar</button>
+        </div>
+    </div>
+</div>
+
+<div id="game-root">
+    <canvas id="gl"></canvas>
+
+    <div id="ui-layer">
+        <div id="btn-exit-game" onclick="MCGame.stop()" title="Sair para o Launcher">X</div>
+        
+        <div id="stats-debug">
+            HP: <span id="hp">20</span> | FPS: <span id="fps">60</span><br>
+            <span id="coords">X:0 Y:0 Z:0</span>
+        </div>
+
+        <div id="crosshair"></div>
+        <div id="btn-inv" onclick="toggleInventory()">...</div>
+        <div id="hotbar"></div>
+
+        <div id="stick-move" class="touch-zone"></div>
+        <div id="btn-jump"></div> 
+    </div>
+
+    <div id="inventory-screen">
+        <h2 style="color:white; margin-bottom:10px;">CRAFTING</h2>
+        <div id="crafting-area"></div>
+        <button class="close-btn" onclick="toggleInventory()">FECHAR</button>
+    </div>
+</div>
+
+<script id="vs" type="x-shader/x-vertex">
+    attribute vec3 position;
+    attribute vec2 uv;
+    attribute float light;
+    uniform mat4 uPMatrix;
+    uniform mat4 uVMatrix;
+    uniform mat4 uMMatrix;
+    varying vec2 vUV;
+    varying float vLight;
+    varying float vFog;
+    void main() {
+        vec4 worldPos = uMMatrix * vec4(position, 1.0);
+        gl_Position = uPMatrix * uVMatrix * worldPos;
+        vUV = uv;
+        vLight = light;
+        float dist = length(uVMatrix * worldPos);
+        vFog = clamp((dist - 30.0) / 40.0, 0.0, 1.0);
+    }
+</script>
+<script id="fs" type="x-shader/x-fragment">
+    precision mediump float;
+    varying vec2 vUV;
+    varying float vLight;
+    varying float vFog;
+    uniform sampler2D uTexture;
+    uniform vec3 uFogColor;
+    void main() {
+        vec4 texColor = texture2D(uTexture, vUV);
+        if(texColor.a < 0.5) discard;
+        vec3 color = texColor.rgb * vLight;
+        gl_FragColor = vec4(mix(color, uFogColor, vFog), 1.0);
+    }
+</script>
+
+<script src="script.js"></script>
+</body>
+</html>
